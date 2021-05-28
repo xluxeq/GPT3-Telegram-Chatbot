@@ -513,6 +513,8 @@ def interact(bot, update, top_p, temperature, mult, new):
             print("==========END==========")
     except Exception as e:
             print(e)
+            errstr = str(e)
+            update.message.reply_text(errstr)
 ########END MAIN HANDLER########
 
 def error(bot, update):
