@@ -10,9 +10,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-#API KEYS
-openai.api_key = "API KEY HERE"
-tgkey = "TELEGRAM BOT KEY HERE"
+#OpenAI API key
+openai.api_key = "OPENAI API KEY"
+#Telegram bot key
+tgkey = "TELEGRAM BOT KEY"
 
 # Lots of console output
 debug = True
