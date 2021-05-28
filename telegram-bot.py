@@ -494,7 +494,6 @@ def interact(bot, update, top_p, temperature, mult, new):
                 return                
         update.message.reply_text(data)
         if debug == True:
-            print("==========")
             mod = str(chatbot)
             print("chatbot: " + mod)
             lear = str(learn)
