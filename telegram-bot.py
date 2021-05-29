@@ -1,6 +1,11 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import twitter_samples, stopwords
+from nltk.tag import pos_tag
+from nltk.tokenize import word_tokenize
+from nltk import FreqDist, classify, NaiveBayesClassifier
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import json, os, string, sys, threading, logging, time, re
+import json, os, string, sys, threading, logging, time, re, random
 import openai
 import nltk
 
@@ -11,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 #OpenAI API key
-openai.api_key = "OPENAI API KEY"
+openai.api_key = "OPENAI AIP KEY"
 #Telegram bot key
 tgkey = "TELEGRAM BOT KEY"
 
@@ -35,8 +40,12 @@ mx = 0.00375
 learning = ""
 # End settings
 
-#Download vader_lexicon if it's not already downloaded.
-nltk.download('vader_lexicon')
+#Download corpus if it's not already downloaded.
+nltk.download('twitter_samples')
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
 
 #Defaults
 chatbot = True
@@ -47,7 +56,79 @@ running = False
 temps = str(temp)
 tpstring = str(top)
 
-# Command handlers
+
+
+#Sentiment functions
+def remove_noise(tweet_tokens, stop_words = ()):
+
+    cleaned_tokens = []
+
+    for token, tag in pos_tag(tweet_tokens):
+        token = re.sub('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+#]|[!*\(\),]|'\
+                       '(?:%[0-9a-fA-F][0-9a-fA-F]))+','', token)
+        token = re.sub("(@[A-Za-z0-9_]+)","", token)
+
+        if tag.startswith("NN"):
+            pos = 'n'
+        elif tag.startswith('VB'):
+            pos = 'v'
+        else:
+            pos = 'a'
+
+        lemmatizer = WordNetLemmatizer()
+        token = lemmatizer.lemmatize(token, pos)
+
+        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
+            cleaned_tokens.append(token.lower())
+    return cleaned_tokens
+
+def get_all_words(cleaned_tokens_list):
+    for tokens in cleaned_tokens_list:
+        for token in tokens:
+            yield token
+
+def get_tweets_for_model(cleaned_tokens_list):
+    for tweet_tokens in cleaned_tokens_list:
+        yield dict([token, True] for token in tweet_tokens)
+
+class train_model:
+    global classifier
+    try:
+        ####Sentiment model training####
+        positive_tweets = twitter_samples.strings('positive_tweets.json')
+        negative_tweets = twitter_samples.strings('negative_tweets.json')
+        text = twitter_samples.strings('tweets.20150430-223406.json')
+        tweet_tokens = twitter_samples.tokenized('positive_tweets.json')[0]
+        stop_words = stopwords.words('english')
+        positive_tweet_tokens = twitter_samples.tokenized('positive_tweets.json')
+        negative_tweet_tokens = twitter_samples.tokenized('negative_tweets.json')
+        positive_cleaned_tokens_list = []
+        negative_cleaned_tokens_list = []
+        for tokens in positive_tweet_tokens:
+            positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+        for tokens in negative_tweet_tokens:
+            negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+        all_pos_words = get_all_words(positive_cleaned_tokens_list)
+        freq_dist_pos = FreqDist(all_pos_words)
+        positive_tokens_for_model = get_tweets_for_model(positive_cleaned_tokens_list)
+        negative_tokens_for_model = get_tweets_for_model(negative_cleaned_tokens_list)
+        positive_dataset = [(tweet_dict, "Positive")
+                             for tweet_dict in positive_tokens_for_model]
+        negative_dataset = [(tweet_dict, "Negative")
+                             for tweet_dict in negative_tokens_for_model]
+        dataset = positive_dataset + negative_dataset
+        random.shuffle(dataset)
+        train_data = dataset[:7000]
+        test_data = dataset[7000:]
+        classifier = NaiveBayesClassifier.train(train_data)
+        if debug == True:
+            print('Sentiment model trained for this session...')
+    except Exception as e:
+        print(e)
+
+##################
+#Command handlers#
+##################
 def start(bot, update):
     """Send a message when the command /start is issued."""
     global running
@@ -332,12 +413,13 @@ def wait(bot, update, top_p, temperature, mult, new):
     global learn
     global learning
     global cache
+    global classifier
     if user == "":
         user = update.message.from_user.id
     if user == update.message.from_user.id:
         user = update.message.from_user.id
         tim = timstart
-        compute = threading.Thread(target=interact, args=(bot, update, top_p, temperature, mult, new,))
+        compute = threading.Thread(target=interact, args=(bot, update, top_p, temperature, mult, new, classifier,))
         compute.start()
         if running == False:
             while tim > 1:
@@ -357,7 +439,7 @@ def wait(bot, update, top_p, temperature, mult, new):
         update.message.reply_text('Bot is in use, current cooldown is: ' + left + ' seconds.')
 
 ########START MAIN HANDLER########
-def interact(bot, update, top_p, temperature, mult, new):
+def interact(bot, update, top_p, temperature, mult, new, classifier):
     global learning
     global learn
     global chatbot
@@ -365,19 +447,11 @@ def interact(bot, update, top_p, temperature, mult, new):
     tex = update.message.text
     text = str(tex)
     # Input sentiment analysis
-    sentences = []
-    sentences.append(text)
-    analyzer = SentimentIntensityAnalyzer()
-    for sentence in sentences:
-        vs = analyzer.polarity_scores(sentence)
-        if debug == True:
-            print("==========START==========")
-            print("INPUT SENTIMENT:")
-            print("{:-<65} {}".format(sentence, str(vs)))
-            print(vs['neg'])
-        if vs['neg'] > 0:
-            update.message.reply_text('Input sentiment is against content warning.')
-            return
+    custom_tokens = remove_noise(word_tokenize(text))
+    sentiment = classifier.classify(dict([token, True] for token in custom_tokens))
+    if sentiment == 'Negative':
+        update.message.reply_text('Input text is not positive. Censoring.')
+        return
     if chatbot == True:
         textlength = len(text.split())
         #Retry cached text and process length
@@ -481,17 +555,11 @@ def interact(bot, update, top_p, temperature, mult, new):
             data = mew
         if learn == True:
             learning = raw_text + data + " "
-        sentences.clear()
-        sentences.append(data)
-        for sentence in sentences:
-            vs = analyzer.polarity_scores(sentence)
-            if debug == True:
-                print("OUTPUT SENTIMENT:")
-                print("{:-<65} {}".format(sentence, str(vs)))
-                print(vs['neg'])
-            if vs['neg'] > 0:
-                update.message.reply_text('Output sentiment is against content warning.')
-                return                
+        custom_tokens = remove_noise(word_tokenize(data))
+        sentiment = classifier.classify(dict([token, True] for token in custom_tokens))
+        if sentiment == 'Negative':
+            update.message.reply_text('Output text is not positive. Censoring.')
+            return
         update.message.reply_text(data)
         if debug == True:
             mod = str(chatbot)
