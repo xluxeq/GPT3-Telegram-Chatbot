@@ -1,4 +1,5 @@
 python-telegram-bot==12.0.0
+VaderSentiment
 openai
 regex
 nltk
