@@ -19,9 +19,6 @@ tgkey = "TELEGRAM BOT KEY"
 debug = True
 # User Session timeout
 timstart = 1500
-
-#Learning context (optional)
-learning = ""
 # End settings
 
 #Defaults
@@ -30,7 +27,8 @@ learn = True
 user = ""
 cache = ""
 running = False
-
+learning = ""
+beginnew = True
 ##################
 #Command handlers#
 ##################
@@ -43,12 +41,14 @@ def start(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = True
         learn = True
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -85,12 +85,14 @@ def chat(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = True
         learn = False
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -123,12 +125,14 @@ def finish(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = False
         learn = False
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -161,12 +165,14 @@ def learnon(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = True
         learn = True
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -199,12 +205,14 @@ def learnoff(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = True
         learn = False
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -237,12 +245,14 @@ def learnreset(bot, update):
     global tim
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
         chatbot = True
         learn = True
         learning = ""
         cache = ""
+        begin = True
         if chatbot == True and learn == True:
             update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         if chatbot == True and learn == False:
@@ -284,6 +294,7 @@ def wait(bot, update, new):
     global learn
     global learning
     global cache
+    global beginnew
     if user == "":
         user = update.message.from_user.id
     if user == update.message.from_user.id:
@@ -314,14 +325,16 @@ def interact(bot, update, new):
     global learn
     global chatbot
     global cache
+    global beginnew
+    print("==========START==========")
     tex = update.message.text
     text = str(tex)
     analyzer = SentimentIntensityAnalyzer()
     if new != True:
         # Input sentiment analysis
         vs = analyzer.polarity_scores(text)
-        print(vs['neg'])
-        if vs['neg'] > 1:
+        print(vs)
+        if vs['neg'] > 0:
             update.message.reply_text('Input text is not positive. Censoring.')
             return
     if chatbot == True:
@@ -351,9 +364,15 @@ def interact(bot, update, new):
             now = datetime.now()
             clock = now.strftime('%I:%M %p')
             joined = begin + clock + "\n"
+            starting = joined + 'Hello, How are you today?' + "\n\n"
             userin = joined + text + "\n\n"
             userout = userin + 'user2 — Today at ' + clock + "\n"
-            initial = userout
+            userstart = starting + 'user2 — Today at ' + clock + "\n" + "I'm doing well, thanks." + "\n\n"
+            if beginnew == True:
+                out = userstart + userout
+                initial = out
+            else:
+                initial = userout
             raw_text = learning + initial
             cache = initial
     ####Text Completion Mode####
@@ -394,11 +413,12 @@ def interact(bot, update, new):
         if learn == True:
             learning = raw_text + data + "\n\n"
         vs = analyzer.polarity_scores(data)
-        print(vs['neg'])
-        if vs['neg'] > 1:
+        print(vs)
+        if vs['neg'] > 0:
             update.message.reply_text('Output text is not positive. Censoring.')
             return
         update.message.reply_text(data)
+        beginnew = False
         if debug == True:
             mod = str(chatbot)
             print("chatbot: " + mod)
