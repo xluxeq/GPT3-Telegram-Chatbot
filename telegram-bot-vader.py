@@ -335,7 +335,7 @@ def interact(bot, update, new):
         vs = analyzer.polarity_scores(text)
         print(vs)
         if vs['neg'] > 0:
-            update.message.reply_text('Input text is not positive. Censoring.')
+            update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if chatbot == True:
         textlength = len(text.split())
@@ -343,19 +343,10 @@ def interact(bot, update, new):
         if new == True and cache:
             user = update.message.from_user
             name = str(user['username'])
-            if ' AM' in cache:
-                m = re.search('.* AM', cache)
-                raw_text = m.group(0)
-            else:
-                raw_text = cache
-            if ' PM' in cache:
-                m = re.search('.* PM', cache)
-                raw_text = m.group(0)
-            else:
-                raw_text = cache
+            raw_text = cache
             if debug == True:
                 print("Cache is...")
-                print(raw_text)
+                print(cache)
         #Run on new text and process length
         if new != True:
             user = update.message.from_user
@@ -374,7 +365,7 @@ def interact(bot, update, new):
             else:
                 initial = userout
             raw_text = learning + initial
-            cache = initial
+            cache = raw_text
     ####Text Completion Mode####
     if chatbot == False:
         textlength = len(text.split())
@@ -415,7 +406,7 @@ def interact(bot, update, new):
         vs = analyzer.polarity_scores(data)
         print(vs)
         if vs['neg'] > 0:
-            update.message.reply_text('Output text is not positive. Censoring.')
+            update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(data)
         beginnew = False
