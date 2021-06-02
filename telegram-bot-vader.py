@@ -345,9 +345,9 @@ def interact(bot, update, new):
             name = str(user['username'])
             if ' AM' in cache:
                 m = re.search('.* AM', cache)
+                raw_text = m.group(0)
             else:
                 raw_text = cache
-                raw_text = m.group(0)
             if ' PM' in cache:
                 m = re.search('.* PM', cache)
                 raw_text = m.group(0)
