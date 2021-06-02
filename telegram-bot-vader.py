@@ -384,7 +384,7 @@ def interact(bot, update, new):
 #############################################
     update.message.reply_text('Computing...')
     try:
-        response = openai.Completion.create(engine="davinci", prompt=raw_text, max_tokens=64, temperature=1, top_p=0.7)
+        response = openai.Completion.create(engine="davinci", prompt=raw_text, max_tokens=64, temperature=0.7, top_p=0.7)
         text = response['choices'][0]['text']
         if debug == True:
             print("Raw output:\n" + text)
