@@ -124,10 +124,9 @@ def wait(bot, update, new):
                 time.sleep(1)
                 tim = tim - 1
             if running == True:
-                chatbot = False
-                learn = False
-                learning = ""
-                cache = ""
+                chat_log = None
+                cache = None
+                qcache = None
                 user = ""
                 update.message.reply_text('Timer has run down, bot has been reset into the default mode.')
                 running = False
