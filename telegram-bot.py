@@ -143,8 +143,8 @@ def ask(question, chat_log=None):
         chat_log = start_chat_log
     prompt = f'{chat_log}Human: {question}\nAI:'
     response = completion.create(
-        prompt=prompt, engine="davinci", stop=['\nHuman'], temperature=0.9,
-        top_p=1, frequency_penalty=0, presence_penalty=0.6, best_of=1,
+        prompt=prompt, engine="davinci", stop=['\nHuman'], temperature=0.7,
+        top_p=0.7, frequency_penalty=0, presence_penalty=0.6, best_of=1,
         max_tokens=150)
     answer = response.choices[0].text.strip()
     return answer
