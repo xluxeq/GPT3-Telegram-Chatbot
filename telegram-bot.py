@@ -27,7 +27,7 @@ chat_log = None
 # Max chat log length (A token is about 4 letters and max tokens is 2048)
 max = int(3000)
 start_chat_log = '''Human: Hello, how are you?\n
-Gumball: I am doing great. How can I help you today?\n
+Human: I am doing great. How can I help you today?\n
 '''
 
 # Enable logging
@@ -153,7 +153,7 @@ def limit(text, max):
 def ask(question, chat_log=None):
     if chat_log is None:
         chat_log = start_chat_log
-    prompt = f'{chat_log}Human: {question}\nGumball:'
+    prompt = f'{chat_log}Human: {question}\nHuman:'
     response = completion.create(
         prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
         top_p=1, frequency_penalty=7, presence_penalty=0.1, best_of=1,
@@ -165,7 +165,7 @@ def append_interaction_to_chat_log(question, answer, chat_log=None):
     if chat_log is None:
         chat_log = start_chat_log
     chat_log = limit(chat_log, max)
-    return f'{chat_log}Human: {question}\nGumball: {answer}\n'
+    return f'{chat_log}Human: {question}\nHuman: {answer}\n'
 	
 def interact(bot, update, new):
     global chat_log
