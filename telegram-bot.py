@@ -8,9 +8,9 @@ import openai
 #Settings#
 ##########
 #OpenAI API key
-openai.api_key = "OPENAI API KEY"
+openai.api_key = "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"
 #Telegram bot key
-tgkey = "TELEGRAM BOT KEY"
+tgkey = "1817918599:AAEYNHYX_-9V2kOKrvCcKEAMv88ey1SQQEI"
 
 # Lots of console output
 debug = True
@@ -24,8 +24,10 @@ running = False
 cache = None
 qcache = None
 chat_log = None
+# Max chat log length (A token is about 4 letters and max tokens is 2048)
+max = int(6144)
 start_chat_log = '''Human: Hello, how are you?\n
-AI: I am doing great. How can I help you today?\n
+Gumball: I am doing great. How can I help you today?\n
 '''
 
 # Enable logging
@@ -137,10 +139,21 @@ def wait(bot, update, new):
 ################
 #Main functions#
 ################
+
+def limit(text, max):
+    if (len(text) >= max):
+        inv = max * -1
+        print("Reducing length of chat history... This can be a bit buggy.")
+        nl = text[inv:]
+        text = re.search(r'(?<=\n)[\s\S]*', nl).group(0)
+        return text
+    else:
+        return text
+
 def ask(question, chat_log=None):
     if chat_log is None:
         chat_log = start_chat_log
-    prompt = f'{chat_log}Human: {question}\nAI:'
+    prompt = f'{chat_log}Human: {question}\nGumball:'
     response = completion.create(
         prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
         top_p=1, frequency_penalty=7, presence_penalty=0.1, best_of=1,
@@ -151,7 +164,8 @@ def ask(question, chat_log=None):
 def append_interaction_to_chat_log(question, answer, chat_log=None):
     if chat_log is None:
         chat_log = start_chat_log
-    return f'{chat_log}Human: {question}\nAI: {answer}\n'
+    chat_log = limit(chat_log, max)
+    return f'{chat_log}Human: {question}\nGumball: {answer}\n'
 	
 def interact(bot, update, new):
     global chat_log
@@ -166,7 +180,7 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of input:\n")
             print(vs)
-        if vs['neg'] > 0:
+        if vs['neg'] > 1:
             update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if new == True:
@@ -195,7 +209,7 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of output:\n")
             print(vs)
-        if vs['neg'] > 0:
+        if vs['neg'] > 1:
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
