@@ -180,7 +180,7 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of input:\n")
             print(vs)
-        if vs['neg'] > 1:
+        if vs['neg'] > 0.6:
             update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if new == True:
@@ -209,7 +209,7 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of output:\n")
             print(vs)
-        if vs['neg'] > 1:
+        if vs['neg'] > 0.6:
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
