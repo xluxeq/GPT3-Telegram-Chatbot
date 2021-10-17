@@ -26,9 +26,12 @@ qcache = None
 chat_log = None
 # Max chat log length (A token is about 4 letters and max tokens is 2048)
 max = int(1500)
-start_chat_log = '''Human: Hello, how are you?\n
-AI: I am doing great. How can I help you today?\n
+start_chat_log = '''Human: Hello, how are you?
+AI: I am doing great. How can I help you today?
 '''
+
+print('Newline character check')
+print(repr(start_chat_log))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
