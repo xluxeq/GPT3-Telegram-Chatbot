@@ -8,9 +8,9 @@ import openai
 #Settings#
 ##########
 #OpenAI API key
-openai.api_key = "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"
+openai.api_key = "YOUR OPENAI API KEY GOES HERE"
 #Telegram bot key
-tgkey = "1817918599:AAEYNHYX_-9V2kOKrvCcKEAMv88ey1SQQEI"
+tgkey = "YOUR TELEGRAM BOT KEY GOES HERE"
 
 # Lots of console output
 debug = True
