@@ -25,7 +25,7 @@ cache = None
 qcache = None
 chat_log = None
 # Max chat log length (A token is about 4 letters and max tokens is 2048)
-max = int(6144)
+max = int(3000)
 start_chat_log = '''Human: Hello, how are you?\n
 Gumball: I am doing great. How can I help you today?\n
 '''
