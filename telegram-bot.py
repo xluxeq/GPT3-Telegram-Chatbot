@@ -24,7 +24,7 @@ running = False
 cache = None
 qcache = None
 chat_log = None
-character = 'AI'
+botname = 'AI'
 username = 'Human'
 # Max chat log length (A token is about 4 letters and max tokens is 2048)
 max = int(3000)
@@ -49,14 +49,14 @@ def start(bot, update):
     global qcache
     global cache
     global tim
-    global character
+    global botname
     global username
     if user == "":
         user = update.message.from_user.id
         chat_log = None
         cache = None
         qcache = None
-        character = 'AI'
+        botname = 'AI'
         username = 'Human'
         update.message.reply_text('Send a message!')
         return
@@ -64,7 +64,7 @@ def start(bot, update):
         chat_log = None
         cache = None
         qcache = None
-        character = 'AI'
+        botname = 'AI'
         username = 'Human'
         update.message.reply_text('Send a message!')
         return
@@ -75,7 +75,7 @@ def start(bot, update):
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('/reset resets the conversation, /retry retries the last output, /username (your name) sets your name to the bot, default is "Human", /character (botname) sets the bots character name, default is "AI"')
+    update.message.reply_text('[/reset] resets the conversation, [/retry] retries the last output, [/username name] sets your name to the bot, default is "Human", [/botname name] sets the bots character name, default is "AI"')
 
 
 def reset(bot, update):
@@ -85,14 +85,14 @@ def reset(bot, update):
     global cache
     global qcache
     global tim
-    global character
+    global botname
     global username
     if user == "":
         user = update.message.from_user.id
         chat_log = None
         cache = None
         qcache = None
-        character = 'AI'
+        botname = 'AI'
         username = 'Human'
         update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         return
@@ -100,7 +100,7 @@ def reset(bot, update):
         chat_log = None
         cache = None
         qcache = None
-        character = 'AI'
+        botname = 'AI'
         username = 'Human'
         update.message.reply_text('Conversation reset...')
         return
@@ -112,21 +112,21 @@ def reset(bot, update):
 def retry(bot, update):
     """Send a message when the command /retry is issued."""
     new = True
-    comput = threading.Thread(target=wait, args=(bot, update, character, username, new,))
+    comput = threading.Thread(target=wait, args=(bot, update, botname, username, new,))
     comput.start()
 
 
 def runn(bot, update):
     """Send a message when a message is received."""
     new = False
-    global character
+    global botname
     global username
-    if "/character " in update.message.text:
+    if "/botname " in update.message.text:
         try:
             string = update.message.text
-            charout = string.split("/character ",1)[1]
-            character = charout
-            response = "The bot character name set to: " + character
+            charout = string.split("/botname ",1)[1]
+            botname = charout
+            response = "The bot character name set to: " + botname
             update.message.reply_text(response)
         except Exception as e:
             update.message.reply_text(e)
@@ -142,11 +142,11 @@ def runn(bot, update):
             update.message.reply_text(e)
         return
     else:
-        comput = threading.Thread(target=wait, args=(bot, update, character, username, new,))
+        comput = threading.Thread(target=wait, args=(bot, update, botname, username, new,))
         comput.start()
 
 
-def wait(bot, update, character, username, new):
+def wait(bot, update, botname, username, new):
     global user
     global chat_log
     global cache
@@ -158,7 +158,7 @@ def wait(bot, update, character, username, new):
     if user == update.message.from_user.id:
         user = update.message.from_user.id
         tim = timstart
-        compute = threading.Thread(target=interact, args=(bot, update, character, username, new,))
+        compute = threading.Thread(target=interact, args=(bot, update, botname, username, new,))
         compute.start()
         if running == False:
             while tim > 1:
@@ -171,8 +171,8 @@ def wait(bot, update, character, username, new):
                 qcache = None
                 user = ""
                 username = 'Human'
-                character = 'AI'
-                update.message.reply_text('Timer has run down, bot has been reset into the default mode.')
+                botname = 'AI'
+                update.message.reply_text('Timer has run down, bot has been reset to defaults.')
                 running = False
     else:
         left = str(tim)
@@ -193,11 +193,11 @@ def limit(text, max):
         return text
 
 
-def ask(username, character, question, chat_log=None):
+def ask(username, botname, question, chat_log=None):
     if chat_log is None:
-        chat_log = username + ': Hello, how are you?\n' + character + ': I am doing great. How can I help you today?\n'
+        chat_log = username + ': Hello, how are you?\n' + botname + ': I am doing great. How can I help you today?\n'
 
-    prompt = f'{chat_log}{username}: {question}\n{character}:'
+    prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
         prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
         top_p=1, frequency_penalty=7, presence_penalty=0.1, best_of=1,
@@ -206,14 +206,14 @@ def ask(username, character, question, chat_log=None):
     return answer
 
 
-def append_interaction_to_chat_log(username, character, question, answer, chat_log=None):
+def append_interaction_to_chat_log(username, botname, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = username + ': Hello, how are you?\n' + character + ': I am doing great. How can I help you today?\n'
+        chat_log = username + ': Hello, how are you?\n' + botname + ': I am doing great. How can I help you today?\n'
     chat_log = limit(chat_log, max)
-    return f'{chat_log}{username}: {question}\n{character}: {answer}\n'
+    return f'{chat_log}{username}: {question}\n{botname}: {answer}\n'
 
 	
-def interact(bot, update, character, username, new):
+def interact(bot, update, botname, username, new):
     global chat_log
     global cache
     global qcache
@@ -243,7 +243,7 @@ def interact(bot, update, character, username, new):
         cache = chat_log
     update.message.reply_text('Computing...')
     try:
-        answer = ask(username, character, question, chat_log)
+        answer = ask(username, botname, question, chat_log)
         if debug == True:
             print("Input:\n" + question)
             print("Output:\n" + answer)
@@ -259,10 +259,12 @@ def interact(bot, update, character, username, new):
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
-        chat_log = append_interaction_to_chat_log(username, character, question, answer, chat_log)
+        chat_log = append_interaction_to_chat_log(username, botname, question, answer, chat_log)
         if debug == True:
             #### Print the chat log for debugging
+            print('-----PRINTING CHAT LOG-----')
             print(chat_log)
+            print('-----END CHAT LOG-----')
     except Exception as e:
             print(e)
             errstr = str(e)
