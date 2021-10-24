@@ -37,7 +37,7 @@ This is the chat and what the backend console looks like in debug mode:
 For user privacy you can turn off debug in the python file.
 
 ### Notes
-- The chat memory is configurable and might be safely set up to 3500 characters. Once it reaches 3000 characters the memory of the chat is reduced for api requirements. Each token is about 4-5 characters, and the api limit is 2000 tokens. When the limit is reached, the chat is cut off at a newline for continual operation. This can get expensive though, and if you can use less characters and reduce the memory by teaking the ask function that would be helpful so the chat is not repetitive.
+- The chat memory is configurable and might be safely set up to 3500 characters. Once it reaches 3000 characters the memory of the chat is reduced for api requirements. Each token is about 4-5 characters, and the api limit is 2000 tokens. When the limit is reached, the chat is cut off at a newline for continual operation. This can get expensive though, and if you can use less characters and reduce the memory by tweaking the ask function that would be helpful so the chat is not repetitive.
 
 - The bot has a 5 minute configurable timer, each user has 5 minutes to make a response and then it will be available to the next user.
 - The sentiment analysis should be set to around > 0.6 or > 0.7, when the negativity of the sentiment analysis is above this it will prompt for different input or a retry option.
