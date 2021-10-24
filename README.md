@@ -8,8 +8,8 @@ start - Basic start command.
 help - Show quick help command.
 reset - Reset the conversation.
 retry - Retry the current input.
-/username - Set your character. See /help
-/character - Set the bot character. See /help 
+username - Set your character. See /help
+character - Set the bot character. See /help 
 ```
 
 To set your character see this example:
