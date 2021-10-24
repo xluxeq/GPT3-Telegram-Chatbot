@@ -28,12 +28,12 @@ print(tgenv)
 
 
 
-
 # Lots of console output
 debug = True
+
 # User Session timeout
 timstart = 300
-
+tim = 1
 
 #Defaults
 user = ""
@@ -61,33 +61,24 @@ completion = openai.Completion()
 ##################
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    global user
     global chat_log
     global qcache
     global cache
     global tim
     global botname
     global username
-    if user == "":
-        user = update.message.from_user.id
+    left = str(tim)
+    if tim == 1:
         chat_log = None
         cache = None
         qcache = None
         botname = 'AI'
         username = 'Human'
         update.message.reply_text('Send a message!')
-        return
-    if user == update.message.from_user.id:
-        chat_log = None
-        cache = None
-        qcache = None
-        botname = 'AI'
-        username = 'Human'
-        update.message.reply_text('Send a message!')
-        return
+        return 
     else:
-        left = str(tim)
         update.message.reply_text('Bot is currently in use, make sure to set your settings when their timer runs down. ' + left + ' seconds.')
+        return
 
 
 def help(bot, update):
@@ -97,41 +88,59 @@ def help(bot, update):
 
 def reset(bot, update):
     """Send a message when the command /reset is issued."""
-    global user
     global chat_log
     global cache
     global qcache
     global tim
     global botname
     global username
-    if user == "":
-        user = update.message.from_user.id
-        chat_log = None
-        cache = None
-        qcache = None
-        botname = 'AI'
-        username = 'Human'
-        update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
-        return
+    left = str(tim)
     if user == update.message.from_user.id:
         chat_log = None
         cache = None
         qcache = None
         botname = 'AI'
         username = 'Human'
-        update.message.reply_text('Conversation reset...')
+        update.message.reply_text('Bot has been reset, send a message!')
         return
+    if tim == 1:
+        chat_log = None
+        cache = None
+        qcache = None
+        botname = 'AI'
+        username = 'Human'
+        update.message.reply_text('Bot has been reset, send a message!')
+        return 
     else:
-        left = str(tim)
         update.message.reply_text('Bot is currently in use, make sure to set your settings when their timer runs down. ' + left + ' seconds.')
+        return
 
 
 def retry(bot, update):
     """Send a message when the command /retry is issued."""
-    new = True
-    comput = threading.Thread(target=wait, args=(bot, update, botname, username, new,))
-    comput.start()
-
+    global chat_log
+    global cache
+    global qcache
+    global tim
+    global botname
+    global username
+    left = str(tim)
+    if user == update.message.from_user.id:
+        new = True
+        comput = threading.Thread(target=wait, args=(bot, update, botname, username, new,))
+        comput.start()
+        return
+    if tim == 1:
+        chat_log = None
+        cache = None
+        qcache = None
+        botname = 'AI'
+        username = 'Human'
+        update.message.reply_text('Send a message!')
+        return 
+    else:
+        update.message.reply_text('Bot is currently in use, make sure to set your settings when their timer runs down. ' + left + ' seconds.')
+        return
 
 def runn(bot, update):
     """Send a message when a message is received."""
@@ -173,7 +182,6 @@ def wait(bot, update, botname, username, new):
     if user == "":
         user = update.message.from_user.id
     if user == update.message.from_user.id:
-        user = update.message.from_user.id
         tim = timstart
         compute = threading.Thread(target=interact, args=(bot, update, botname, username, new,))
         compute.start()
@@ -243,7 +251,7 @@ def interact(bot, update, botname, username, new):
         if debug == True:
             print("Sentiment of input:\n")
             print(vs)
-        if vs['neg'] > 0.7:
+        if vs['neg'] > 0.9:
             update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if new == True:
@@ -272,7 +280,7 @@ def interact(bot, update, botname, username, new):
         if debug == True:
             print("Sentiment of output:\n")
             print(vs)
-        if vs['neg'] > 0.7:
+        if vs['neg'] > 0.9:
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
