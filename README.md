@@ -28,3 +28,10 @@ tgkey = "YOUR TELEGRAM BOT KEY GOES HERE"
 ```
 
 Runs on latest python and latest python-telegram-bot pip plugins.
+
+
+### Screenshots
+This is the chat and what the backend console looks like in debug mode:
+![Alt text](https://i.imgur.com/TAIozL3.jpg "Normal Operating Mode and Backend")
+
+For user privacy you can turn off debug in the python file.
