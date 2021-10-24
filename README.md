@@ -20,9 +20,11 @@ To set the bot character name see this example:
 
 
 Set these options in the python file:
+```
 #OpenAI API key
 openai.api_key = "YOUR OPENAI API KEY GOES HERE"
 #Telegram bot key
 tgkey = "YOUR TELEGRAM BOT KEY GOES HERE"
+```
 
 Runs on latest python and latest python-telegram-bot pip plugins.
