@@ -1,5 +1,6 @@
 # GPT3-Telegram-Chatbot
 OpenAI chatbot for Telegram using GPT-3 with sentiment analysis safety using VaderSentiment.
+
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 Command reference:
