@@ -7,10 +7,27 @@ import openai
 ##########
 #Settings#
 ##########
+
+#You can also set these environment variables for docker
+
 #OpenAI API key
-openai.api_key = "YOUR OPENAI API KEY GOES HERE"
+aienv = os.getenv('OPENAI_KEY')
+if aienv == None:
+    openai.api_key = "YOUR OPENAI API KEY GOES HERE"
+else:
+    openai.api_key = aienv
+print(aienv)
+
 #Telegram bot key
-tgkey = "YOUR TELEGRAM BOT KEY GOES HERE"
+tgenv = os.getenv('TELEGRAM_KEY')
+if tgenv == None:
+    tgkey = "YOUR TELEGRAM BOT KEY GOES HERE"
+else:
+    tgkey = tgenv
+print(tgenv)
+
+
+
 
 # Lots of console output
 debug = True
