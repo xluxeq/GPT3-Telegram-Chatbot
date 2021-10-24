@@ -24,21 +24,20 @@ running = False
 cache = None
 qcache = None
 chat_log = None
+character = 'AI'
+username = 'Human'
 # Max chat log length (A token is about 4 letters and max tokens is 2048)
 max = int(3000)
-start_chat_log = '''Human: Hello, how are you?
-AI: I am doing great. How can I help you today?
-'''
 
-print('Newline character check')
-print(repr(start_chat_log))
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 completion = openai.Completion()
+
 
 ##################
 #Command handlers#
@@ -50,26 +49,34 @@ def start(bot, update):
     global qcache
     global cache
     global tim
+    global character
+    global username
     if user == "":
         user = update.message.from_user.id
         chat_log = None
         cache = None
         qcache = None
+        character = 'AI'
+        username = 'Human'
         update.message.reply_text('Send a message!')
         return
     if user == update.message.from_user.id:
         chat_log = None
         cache = None
         qcache = None
+        character = 'AI'
+        username = 'Human'
         update.message.reply_text('Send a message!')
         return
     else:
         left = str(tim)
         update.message.reply_text('Bot is currently in use, make sure to set your settings when their timer runs down. ' + left + ' seconds.')
 
+
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('/reset resets the conversation, /retry retries the last output.')
+    update.message.reply_text('/reset resets the conversation, /retry retries the last output, /username (your name) sets your name to the bot, default is "Human", /character (botname) sets the bots character name, default is "AI"')
+
 
 def reset(bot, update):
     """Send a message when the command /reset is issued."""
@@ -78,38 +85,68 @@ def reset(bot, update):
     global cache
     global qcache
     global tim
+    global character
+    global username
     if user == "":
         user = update.message.from_user.id
         chat_log = None
         cache = None
         qcache = None
+        character = 'AI'
+        username = 'Human'
         update.message.reply_text('Send a message! Get it computed! GPT-3. I am in the learning chatbot mode.')
         return
     if user == update.message.from_user.id:
         chat_log = None
         cache = None
         qcache = None
+        character = 'AI'
+        username = 'Human'
         update.message.reply_text('Conversation reset...')
         return
     else:
         left = str(tim)
         update.message.reply_text('Bot is currently in use, make sure to set your settings when their timer runs down. ' + left + ' seconds.')
 
+
 def retry(bot, update):
     """Send a message when the command /retry is issued."""
     new = True
-    comput = threading.Thread(target=wait, args=(bot, update, new,))
+    comput = threading.Thread(target=wait, args=(bot, update, character, username, new,))
     comput.start()
+
 
 def runn(bot, update):
     """Send a message when a message is received."""
     new = False
-    comput = threading.Thread(target=wait, args=(bot, update, new,))
-    comput.start()
+    global character
+    global username
+    if "/character " in update.message.text:
+        try:
+            string = update.message.text
+            charout = string.split("/character ",1)[1]
+            character = charout
+            response = "The bot character name set to: " + character
+            update.message.reply_text(response)
+        except Exception as e:
+            update.message.reply_text(e)
+        return
+    if "/username " in update.message.text:
+        try:
+            string = update.message.text
+            userout = string.split("/username ",1)[1]
+            username = userout
+            response = "Your character name set to: " + username
+            update.message.reply_text(response)
+        except Exception as e:
+            update.message.reply_text(e)
+        return
+    else:
+        comput = threading.Thread(target=wait, args=(bot, update, character, username, new,))
+        comput.start()
 
 
-
-def wait(bot, update, new):
+def wait(bot, update, character, username, new):
     global user
     global chat_log
     global cache
@@ -121,7 +158,7 @@ def wait(bot, update, new):
     if user == update.message.from_user.id:
         user = update.message.from_user.id
         tim = timstart
-        compute = threading.Thread(target=interact, args=(bot, update, new,))
+        compute = threading.Thread(target=interact, args=(bot, update, character, username, new,))
         compute.start()
         if running == False:
             while tim > 1:
@@ -133,16 +170,18 @@ def wait(bot, update, new):
                 cache = None
                 qcache = None
                 user = ""
+                username = 'Human'
+                character = 'AI'
                 update.message.reply_text('Timer has run down, bot has been reset into the default mode.')
                 running = False
     else:
         left = str(tim)
         update.message.reply_text('Bot is in use, current cooldown is: ' + left + ' seconds.')
 
+
 ################
 #Main functions#
 ################
-
 def limit(text, max):
     if (len(text) >= max):
         inv = max * -1
@@ -153,10 +192,12 @@ def limit(text, max):
     else:
         return text
 
-def ask(question, chat_log=None):
+
+def ask(username, character, question, chat_log=None):
     if chat_log is None:
-        chat_log = start_chat_log
-    prompt = f'{chat_log}Human: {question}\nAI:'
+        chat_log = username + ': Hello, how are you?\n' + character + ': I am doing great. How can I help you today?\n'
+
+    prompt = f'{chat_log}{username}: {question}\n{character}:'
     response = completion.create(
         prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
         top_p=1, frequency_penalty=7, presence_penalty=0.1, best_of=1,
@@ -164,13 +205,15 @@ def ask(question, chat_log=None):
     answer = response.choices[0].text.strip()
     return answer
 
-def append_interaction_to_chat_log(question, answer, chat_log=None):
+
+def append_interaction_to_chat_log(username, character, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = start_chat_log
+        chat_log = username + ': Hello, how are you?\n' + character + ': I am doing great. How can I help you today?\n'
     chat_log = limit(chat_log, max)
-    return f'{chat_log}Human: {question}\nAI: {answer}\n'
+    return f'{chat_log}{username}: {question}\n{character}: {answer}\n'
+
 	
-def interact(bot, update, new):
+def interact(bot, update, character, username, new):
     global chat_log
     global cache
     global qcache
@@ -183,7 +226,7 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of input:\n")
             print(vs)
-        if vs['neg'] > 0.6:
+        if vs['neg'] > 1:
             update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if new == True:
@@ -200,7 +243,7 @@ def interact(bot, update, new):
         cache = chat_log
     update.message.reply_text('Computing...')
     try:
-        answer = ask(question, chat_log)
+        answer = ask(username, character, question, chat_log)
         if debug == True:
             print("Input:\n" + question)
             print("Output:\n" + answer)
@@ -212,11 +255,14 @@ def interact(bot, update, new):
         if debug == True:
             print("Sentiment of output:\n")
             print(vs)
-        if vs['neg'] > 0.6:
+        if vs['neg'] > 1:
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
-        chat_log = append_interaction_to_chat_log(question, answer, chat_log)
+        chat_log = append_interaction_to_chat_log(username, character, question, answer, chat_log)
+        if debug == True:
+            #### Print the chat log for debugging
+            print(chat_log)
     except Exception as e:
             print(e)
             errstr = str(e)
@@ -225,9 +271,11 @@ def interact(bot, update, new):
 # End main functions#
 #####################
 
+
 def error(bot, update):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update)
+
 
 def main():
     """Start the bot."""
@@ -252,6 +300,7 @@ def main():
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
+
 
 if __name__ == '__main__':
     main()
