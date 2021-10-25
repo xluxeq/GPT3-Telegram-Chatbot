@@ -220,12 +220,12 @@ def limit(text, max):
 
 def ask(username, botname, question, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a conversation between '+ username + ' and ' + botname + ':\n' + username + ': Hello! Who am I chatting with?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
+        chat_log = 'The following is a conversation with ' + botname + ' and ' + username + '.\n\n' + username + ': Who am I chatting with today?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
 
     prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
-        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.75,
-        top_p=0.5, frequency_penalty=2, presence_penalty=2, best_of=1,
+        prompt=prompt, engine="davinci", stop=['\n'], temperature=1,
+        top_p=0.9, frequency_penalty=2, presence_penalty=2, best_of=1,
         max_tokens=100)
     answer = response.choices[0].text.strip()
     return answer
@@ -233,7 +233,7 @@ def ask(username, botname, question, chat_log=None):
 
 def append_interaction_to_chat_log(username, botname, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a conversation between '+ username + ' and ' + botname + ':\n' + username + ': Hello! Who am I chatting with?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
+        chat_log = 'The following is a conversation with ' + botname + ' and ' + username + '.\n\n' + username + ': Who am I chatting with today?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
     chat_log = limit(chat_log, max)
     return f'{chat_log}{username}: {question}\n{botname}: {answer}\n'
 
