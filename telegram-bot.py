@@ -224,8 +224,8 @@ def ask(username, botname, question, chat_log=None):
 
     prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
-        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
-        top_p=1, frequency_penalty=7, presence_penalty=0.1, best_of=1,
+        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.5,
+        top_p=1, frequency_penalty=2, presence_penalty=1.5, best_of=1,
         max_tokens=150)
     answer = response.choices[0].text.strip()
     return answer
@@ -251,7 +251,7 @@ def interact(bot, update, botname, username, new):
         if debug == True:
             print("Sentiment of input:\n")
             print(vs)
-        if vs['neg'] > 0.9:
+        if vs['neg'] > 1:
             update.message.reply_text('Input text is not positive. Input text must be of positive sentiment/emotion.')
             return
     if new == True:
@@ -280,7 +280,7 @@ def interact(bot, update, botname, username, new):
         if debug == True:
             print("Sentiment of output:\n")
             print(vs)
-        if vs['neg'] > 0.9:
+        if vs['neg'] > 1:
             update.message.reply_text('Output text is not positive. Censoring. Use /retry to get positive output.')
             return
         update.message.reply_text(out)
