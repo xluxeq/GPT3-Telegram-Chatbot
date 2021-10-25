@@ -220,7 +220,7 @@ def limit(text, max):
 
 def ask(username, botname, question, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a conversation with ' + botname + ' and ' + username + '.\n\n' + username + ': Who am I chatting with today?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
+        chat_log = 'The following is a chat between ' + username + ' and ' + botname + '.\n'
 
     prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
@@ -233,7 +233,7 @@ def ask(username, botname, question, chat_log=None):
 
 def append_interaction_to_chat_log(username, botname, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a conversation with ' + botname + ' and ' + username + '.\n\n' + username + ': Who am I chatting with today?\n' + botname + ': My name is ' + botname + '! Glad to meet you!\n'
+        chat_log = 'The following is a chat between ' + username + ' and ' + botname + '.\n'
     chat_log = limit(chat_log, max)
     return f'{chat_log}{username}: {question}\n{botname}: {answer}\n'
 
