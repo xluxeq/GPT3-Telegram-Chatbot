@@ -225,7 +225,7 @@ def ask(username, botname, question, chat_log=None):
     prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
         prompt=prompt, engine="davinci", stop=['\n'], temperature=1,
-        top_p=0.9, frequency_penalty=7, presence_penalty=0.50, best_of=1,
+        top_p=0.9, frequency_penalty=3.00, presence_penalty=0.25, best_of=1,
         max_tokens=250)
     answer = response.choices[0].text.strip()
     return answer
