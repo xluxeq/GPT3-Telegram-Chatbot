@@ -44,3 +44,6 @@ For user privacy you can turn off debug in the python file.
 
 - The bot has a 5 minute configurable timer, each user has 5 minutes to make a response and then it will be available to the next user.
 - The sentiment analysis should be set to around > 0.6 or > 0.7, when the negativity of the sentiment analysis is above this it will prompt for different input or a retry option.
+- If you want to change the bot to roleplay mode, change lines 223 and 238 to:
+
+```chat_log = 'The following is a roleplay between two users:\n\n'```
