@@ -221,21 +221,26 @@ def limit(text, max):
 def ask(username, botname, question, chat_log=None):
     if chat_log is None:
         chat_log = 'The following is a chat between two users:\n\n'
-
-    prompt = f'{chat_log}{username}: {question}\n{botname}:'
+    now = datetime.now()
+    ampm = now.strftime("%I:%M %p")
+    t = '[' + ampm + '] '
+    prompt = f'{chat_log}{t}{username}: {question}\n{t}{botname}:'
     response = completion.create(
-        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.5,
-        top_p=0.9, frequency_penalty=0, presence_penalty=2, best_of=2,
+        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.9,
+        top_p=1, frequency_penalty=15, presence_penalty=2, best_of=3,
         max_tokens=250)
     answer = response.choices[0].text.strip()
     return answer
-
+    # fp = 15 pp= 1 top_p = 1 temp = 0.9
 
 def append_interaction_to_chat_log(username, botname, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = username + ''
+        chat_log = 'The following is a chat between two users:\n\n'
     chat_log = limit(chat_log, max)
-    return f'{chat_log}{username}: {question}\n{botname}: {answer}\n'
+    now = datetime.now()
+    ampm = now.strftime("%I:%M %p")
+    t = '[' + ampm + '] '
+    return f'{chat_log}{t}{username}: {question}\n{t}{botname}: {answer}\n'
 
 def interact(bot, update, botname, username, new):
     global chat_log
