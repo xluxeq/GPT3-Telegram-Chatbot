@@ -220,12 +220,12 @@ def limit(text, max):
 
 def ask(username, botname, question, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a chat between ' + username + ' and ' + botname + '.\n'
+        chat_log = 'The following is a chat between two users:\n\n'
 
     prompt = f'{chat_log}{username}: {question}\n{botname}:'
     response = completion.create(
-        prompt=prompt, engine="davinci", stop=['\n'], temperature=1,
-        top_p=0.9, frequency_penalty=3.00, presence_penalty=0.25, best_of=1,
+        prompt=prompt, engine="davinci", stop=['\n'], temperature=0.5,
+        top_p=0.9, frequency_penalty=0, presence_penalty=2, best_of=2,
         max_tokens=250)
     answer = response.choices[0].text.strip()
     return answer
@@ -233,11 +233,10 @@ def ask(username, botname, question, chat_log=None):
 
 def append_interaction_to_chat_log(username, botname, question, answer, chat_log=None):
     if chat_log is None:
-        chat_log = 'The following is a chat between ' + username + ' and ' + botname + '.\n'
+        chat_log = username + ''
     chat_log = limit(chat_log, max)
     return f'{chat_log}{username}: {question}\n{botname}: {answer}\n'
 
-	
 def interact(bot, update, botname, username, new):
     global chat_log
     global cache
@@ -266,7 +265,7 @@ def interact(bot, update, botname, username, new):
         question = text
         qcache = question
         cache = chat_log
-    update.message.reply_text('Computing...')
+    #update.message.reply_text('Computing...')
     try:
         answer = ask(username, botname, question, chat_log)
         if debug == True:
@@ -274,7 +273,7 @@ def interact(bot, update, botname, username, new):
             print("Output:\n" + answer)
             print("====================")
         stripes = answer.encode(encoding=sys.stdout.encoding,errors='ignore')
-        decoded	= stripes.decode("utf-8")
+        decoded = stripes.decode("utf-8")
         out = str(decoded)
         vs = analyzer.polarity_scores(out)
         if debug == True:
